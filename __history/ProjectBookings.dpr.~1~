@@ -1,0 +1,14 @@
+program ProjectBookings;
+
+uses
+  Vcl.Forms,
+  Bookings in 'Bookings.pas' {FBooking};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFBooking, FBooking);
+  Application.Run;
+end.

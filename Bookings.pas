@@ -1,0 +1,135 @@
+unit Bookings;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.WinXPickers, Vcl.ComCtrls,
+  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
+
+type
+  TFBooking = class(TForm)
+    Label1: TLabel;
+    edKodeBooking: TEdit;
+    Label2: TLabel;
+    edNamaPelanggan: TEdit;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    MemoLayanan: TMemo;
+    dtBooking: TDateTimePicker;
+    tpBooking: TTimePicker;
+    Panel1: TPanel;
+    btnCancel: TBitBtn;
+    Splitter1: TSplitter;
+    btnSimpan: TBitBtn;
+    Splitter2: TSplitter;
+    procedure FormShow(Sender: TObject);
+    procedure btnSimpanClick(Sender: TObject);
+    procedure btnCancelClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+   IsEditMode: Boolean;
+   BookingID: Integer;
+    { Public declarations }
+  end;
+
+var
+  FBooking: TFBooking;
+
+implementation
+
+{$R *.dfm}
+
+uses UDM, ListBooking;
+
+procedure TFBooking.btnCancelClick(Sender: TObject);
+begin
+FBooking.Close;
+end;
+
+procedure TFBooking.btnSimpanClick(Sender: TObject);
+begin
+  if Trim(edNamaPelanggan.Text) = '' then
+  begin
+    ShowMessage('Nama pelanggan harus diisi.');
+    edNamaPelanggan.SetFocus;
+    Exit;
+  end;
+
+  if Trim(MemoLayanan.Text) = '' then
+  begin
+    ShowMessage('Layanan harus diisi.');
+    MemoLayanan.SetFocus;
+    Exit;
+  end;
+
+  if IsEditMode then
+  begin
+    with FUDM.Qexec do
+    begin
+      Close;
+      SQL.Text :=
+        'UPDATE bookings SET kode_booking = :kode, nama_pelanggan = :nama, layanan = :layanan, tanggal = :tgl, jam = :jam WHERE id = :id';
+      ParamByName('kode').AsString := edKodeBooking.Text;
+      ParamByName('nama').AsString := edNamaPelanggan.Text;
+      ParamByName('layanan').AsString := MemoLayanan.Text;
+      ParamByName('tgl').AsDate := dtBooking.Date;
+      ParamByName('jam').AsTime := tpBooking.Time;
+      ParamByName('id').AsInteger := BookingID;
+      ExecSQL;
+    end;
+  end
+  else
+  begin
+    with FUDM.Qexec do
+    begin
+      Close;
+      SQL.Text :=
+        'INSERT INTO bookings(kode_booking, nama_pelanggan, layanan, tanggal, jam) VALUES(:kode, :nama, :layanan, :tgl, :jam)';
+      ParamByName('kode').AsString := edKodeBooking.Text;
+      ParamByName('nama').AsString := edNamaPelanggan.Text;
+      ParamByName('layanan').AsString := MemoLayanan.Text;
+      ParamByName('tgl').AsDate := dtBooking.Date;
+      ParamByName('jam').AsTime := tpBooking.Time;
+      ExecSQL;
+    end;
+  end;
+
+  ShowMessage('Data berhasil disimpan!');
+  ModalResult := mrOK;
+end;
+
+procedure TFBooking.FormShow(Sender: TObject);
+begin
+if IsEditMode then
+  begin
+    with FUDM.Qexec do
+    begin
+      Close;
+      SQL.Text := 'SELECT * FROM bookings WHERE id = :id';
+      ParamByName('id').AsInteger := BookingID;
+      Open;
+
+      if not IsEmpty then
+      begin
+        edKodeBooking.Text := FieldByName('kode_booking').AsString;
+        edNamaPelanggan.Text := FieldByName('nama_pelanggan').AsString;
+        dtBooking.Date := FieldByName('tanggal').AsDateTime;
+        tpBooking.Time := FieldByName('jam').AsDateTime;
+        MemoLayanan.Text := FieldByName('layanan').AsString;
+      end;
+    end;
+  end
+  else
+  begin
+    edKodeBooking.Text := 'BK-' + FormatDateTime('yyyymmddhhnnss', Now);
+    edNamaPelanggan.Clear;
+    MemoLayanan.Clear;
+    dtBooking.Date := Now;
+    tpBooking.Time := Now;
+  end;
+end;
+
+end.

@@ -1,0 +1,18 @@
+program ProjectBookings;
+
+uses
+  Vcl.Forms,
+  Bookings in 'Bookings.pas' {FBooking},
+  UDM in 'UDM.pas' {FUDM: TDataModule},
+  ListBooking in 'ListBooking.pas' {FListBooking};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFListBooking, FListBooking);
+  Application.CreateForm(TFBooking, FBooking);
+  Application.CreateForm(TFUDM, FUDM);
+  Application.Run;
+end.

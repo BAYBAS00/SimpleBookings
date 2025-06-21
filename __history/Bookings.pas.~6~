@@ -1,0 +1,44 @@
+unit Bookings;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.WinXPickers, Vcl.ComCtrls,
+  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
+
+type
+  TFBooking = class(TForm)
+    Label1: TLabel;
+    edKodeBooking: TEdit;
+    Label2: TLabel;
+    edNamaPelanggan: TEdit;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    MemoLayanan: TMemo;
+    dtBooking: TDateTimePicker;
+    tpBooking: TTimePicker;
+    Panel1: TPanel;
+    btnCancel: TBitBtn;
+    Splitter1: TSplitter;
+    btnSimpan: TBitBtn;
+    Splitter2: TSplitter;
+  private
+    { Private declarations }
+  public
+   IsEditMode: Boolean;
+   BookingID: Integer;
+    { Public declarations }
+  end;
+
+var
+  FBooking: TFBooking;
+
+implementation
+
+{$R *.dfm}
+
+uses UDM, ListBooking;
+
+end.

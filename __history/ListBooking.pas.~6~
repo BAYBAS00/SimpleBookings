@@ -1,0 +1,116 @@
+unit ListBooking;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons,
+  Data.DB, Vcl.Grids, Vcl.DBGrids;
+
+type
+  TFListBooking = class(TForm)
+    Panel1: TPanel;
+    Panel2: TPanel;
+    Splitter1: TSplitter;
+    btnTambah: TBitBtn;
+    btnEdit: TBitBtn;
+    Splitter2: TSplitter;
+    Splitter3: TSplitter;
+    btnLaporan: TBitBtn;
+    btnHapus: TBitBtn;
+    Splitter4: TSplitter;
+    btnRefresh: TBitBtn;
+    Splitter5: TSplitter;
+    Panel3: TPanel;
+    Splitter6: TSplitter;
+    Label1: TLabel;
+    Splitter7: TSplitter;
+    Edit1: TEdit;
+    DBGrid1: TDBGrid;
+    procedure btnTambahClick(Sender: TObject);
+    procedure btnRefreshClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnEditClick(Sender: TObject);
+    procedure btnHapusClick(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FListBooking: TFListBooking;
+
+implementation
+
+{$R *.dfm}
+
+uses UDM, Bookings;
+
+procedure TFListBooking.btnEditClick(Sender: TObject);
+begin
+if not FUDM.Qtemp.IsEmpty then
+  begin
+    Application.CreateForm(TFBooking, FBooking);
+    FBooking.IsEditMode := True;
+    FBooking.BookingID := FUDM.Qtemp.FieldByName('id').AsInteger;
+    if FBooking.ShowModal = mrOK then
+    btnRefreshClick(nil);
+    FBooking.Free;
+
+  end;
+end;
+
+procedure TFListBooking.btnHapusClick(Sender: TObject);
+var
+  idBooking: Integer;
+begin
+   if not FUDM.Qtemp.IsEmpty then
+    if MessageDlg('Yakin ingin menghapus data ini?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    begin
+      idBooking := FUDM.Qtemp.FieldByName('id').AsInteger;
+      with FUDM.Qtemp do
+      begin
+        Close;
+        SQL.Text := 'DELETE FROM bookings WHERE id = :id';
+        ParamByName('id').AsInteger := idBooking;
+        ExecSQL;
+      end;
+
+      btnRefreshClick(Sender);
+    end;
+end;
+
+procedure TFListBooking.btnRefreshClick(Sender: TObject);
+begin
+with FUDM.Qtemp do
+  begin
+    Close;
+    SQL.Text := 'SELECT * FROM bookings ORDER BY tanggal, jam';
+    Open;
+  end;
+
+end;
+
+procedure TFListBooking.btnTambahClick(Sender: TObject);
+begin
+Application.CreateForm(TFBooking, FBooking);
+  FBooking.IsEditMode := False;
+  FBooking.BookingID := -1;
+  if FBooking.ShowModal = mrOK then
+    btnRefreshClick(nil); // refresh hanya jika simpan berhasil
+  FBooking.Free;
+end;
+
+procedure TFListBooking.DBGrid1DblClick(Sender: TObject);
+begin
+btnEditClick(sender);
+end;
+
+procedure TFListBooking.FormShow(Sender: TObject);
+begin
+btnRefreshClick(sender);
+end;
+
+end.
